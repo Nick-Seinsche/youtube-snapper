@@ -23,19 +23,17 @@ placed in the same directory as *youtube_downloader.py*
 
 - See *requirment.txt*
 
-
 ## execution / usage
 
 Use `python3 youtube_downloader.py -h` for help.
 
 Usage examples for this module:
+
 `python3 youtube_downloader.py -v "VIDEO_URL_1" "VIDEO_URL_2" "VIDEO_URL_3" --hq --mkv`
 
 `python3 youtube_downloader.py -p "PLAYLIST_URL" --mp3`
 
 `python3 youtube_downloader.py -f "FILE_PATH"`
-
-
 
 ## additional links
 
