@@ -6,7 +6,7 @@ import urllib.request
 
 
 doc = """
-youtube_downloader.py module
+youtube_snapper.py module
 ---------------------------------------------------------------------
 
 REQUIREMENTS TO RUN THIS MODULE:
@@ -18,9 +18,9 @@ Documentation of the pytube module:
     https://pytube.io/en/latest/api.html#stream-object
 
 Usage examples of this module:
->>> youtube_downloader.py -v "VidLink1" "VidLink2" "VidLink3" --hq --mkv
->>> youtube_downloader.py -p "Playlistlink" --mp3
->>> youtube_downloader.py -f "Filelink"
+>>> youtube_snapper.py -v "VidLink1" "VidLink2" "VidLink3" --hq --mkv
+>>> youtube_snapper.py -p "Playlistlink" --mp3
+>>> youtube_snapper.py -f "Filelink"
 
 ---------------------------------------------------------------------
 """
