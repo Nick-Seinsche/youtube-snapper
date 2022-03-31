@@ -1,8 +1,9 @@
 # youtube downloader
 
 youtube downloader is a lightweight console application build on top of
-the pytube module in combination with ffmp that allows downloading videos,
-playlists and music from youtube in an easy way.
+the pytube module in combination with ffmpeg that allows downloading videos,
+playlists and music from youtube in an easy way, without having to handle
+downloading and merging streams manually.
 
 ## features
 
@@ -16,16 +17,17 @@ while online services of the same kind are fairly common, downloading larger
 playlists is either restricted or a premium service for most of the service
 providers. This tool has none of such restrictions and is completely free.
 
-## installation
+## installation / setup
 
 - Latest [FFMPEG](https://ffmpeg.org/download.html) executable downloaded and
-placed in the same directory as *youtube_downloader.py*
+placed in the same directory as *youtube_downloader.py*. Alternatively the
+relative path may be specified in *youtube_downloader.py*.
 
 - See *requirment.txt*
 
 ## execution / usage
 
-Use `python3 youtube_downloader.py -h` for help.
+Use `python3 youtube_downloader.py` for an overview.
 
 Usage examples for this module:
 
@@ -33,7 +35,7 @@ Usage examples for this module:
 
 `python3 youtube_downloader.py -p "PLAYLIST_URL" --mp3`
 
-`python3 youtube_downloader.py -f "FILE_PATH"`
+`python3 youtube_downloader.py -f "PATH_TO_FILE"`
 
 ## additional links
 
