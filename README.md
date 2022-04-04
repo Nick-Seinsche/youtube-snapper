@@ -2,7 +2,7 @@
 
 ## About
 
-youtube snapper is a lightweight console application build on top of
+youtube snapper is a lightweight console tool build on top of
 the pytube module in combination with FFmpeg that allows downloading videos,
 playlists and music from youtube in an easy way, without having to handle
 downloading and merging streams manually.
