@@ -21,8 +21,8 @@ providers. This tool has none of such restrictions and is completely free.
 
 ## Installation / Setup
 
-- Latest [FFmpeg](https://ffmpeg.org/download.html) executable downloaded and
-placed in the same directory as *youtube_snapper.py*. Alternatively the
+- Latest [FFmpeg](https://ffmpeg.org/download.html) executable (*ffmpeg.exe*) downloaded (e.g. from [here](https://github.com/BtbN/FFmpeg-Builds/releases)) and placed in the same  directory 
+as *youtube_snapper.py*. Alternatively the
 relative path may be specified in *youtube_snapper.py*.
 
 - Python Version 3.9.7 or greater

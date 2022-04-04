@@ -51,8 +51,9 @@ def download_iterator(url_list, to_call):
         Handles downloads of multiple objects.
     """
     failed = []
+    max_retry = 3
     to_download = url_list.copy()
-    while True:
+    while max_retry > 0:
         for video_url in to_download:
             try:
                 print("-" * 15)
@@ -61,13 +62,18 @@ def download_iterator(url_list, to_call):
                 print("Failed a video. Trying again.")
                 print(e)
                 failed.append(video_url)
+                print("waiting 5 seconds ...")
+                time.sleep(5)
             else:
                 print("Success.")
         if failed:
             to_download = failed
             failed = []
+            max_retry -= 1
         else:
             break
+    else:
+        print("Download Aborted!")
 
 
 def download_video(video_url):
@@ -192,7 +198,7 @@ if __name__ == "__main__":
     g.add_argument("-playlist", "-p", type=str, metavar="PLAYLIST_URL",
                    help="Downloads all videos in the specified playlist")
     g.add_argument("-file", "-f", type=str, metavar="FILE_PATH",
-                   help="Downloads all urls specified in textfile"
+                   help="Downloads all urls specified in textfile in the same dir"
                    " (seperated by new line)")
     parser.add_argument("-hq", action="store_true",
                         help="Allows resolutions > 1080p")
@@ -206,16 +212,22 @@ if __name__ == "__main__":
     download = download_sound if args.mp3 else download_video
 
     if args.video:
+        if not os.path.exists(DL_PATH):
+            os.makedirs(DL_PATH)
         os.chdir(DL_PATH)
         download_iterator(args.video, download)
     elif args.playlist:
         playlist = pytube.Playlist(args.playlist)
-        os.chdir(DL_PATH + "/" + convert_title(playlist.title))
+        if not os.path.exists(DL_PATH + "/" + convert_title(playlist.title)):
+            os.makedirs(DL_PATH + "/" + convert_title(playlist.title))
         download_iterator(playlist.video_urls, download)
     elif args.file:
-        os.chdir(DL_PATH + "/" + args.file[:args.file.rfind(".")])
+        if (not os.path.exists(DL_PATH + "/"
+                               + args.file[:args.file.rfind(".")])):
+            os.makedirs(DL_PATH + "/" + args.file[:args.file.rfind(".")])
         with open(args.file, "r") as f:
             links = list(map(str.strip, f.readlines()))
+        os.chdir(DL_PATH + "/" + args.file[:args.file.rfind(".")])
         download_iterator(links, download)
     else:
         print(doc, end="\n"*2)
