@@ -58,7 +58,8 @@ def download_iterator(url_list, to_call):
                 print("-" * 15)
                 to_call(video_url)
             except Exception as e:
-                print("Failed a video. Trying again. \n" + e)
+                print("Failed a video. Trying again.")
+                print(e)
                 failed.append(video_url)
             else:
                 print("Success.")

@@ -1,31 +1,35 @@
-# youtube snapper
+# Youtube snapper
+
+## About
 
 youtube snapper is a lightweight console application build on top of
 the pytube module in combination with FFmpeg that allows downloading videos,
 playlists and music from youtube in an easy way, without having to handle
 downloading and merging streams manually.
 
-## features
+## Features
 
 - download youtube videos as mp4, mp3 or mkv in the best available quality by
 providing the link
 - download a youtube playlist by providing the playlist link
 
-## use case
+## Use case
 
 while online services of the same kind are fairly common, downloading larger
 playlists is either restricted or a premium service for most of the service
 providers. This tool has none of such restrictions and is completely free.
 
-## installation / setup
+## Installation / Setup
 
 - Latest [FFmpeg](https://ffmpeg.org/download.html) executable downloaded and
 placed in the same directory as *youtube_snapper.py*. Alternatively the
 relative path may be specified in *youtube_snapper.py*.
 
+- Python Version 3.9.7 or greater
+
 - See *requirments.txt*
 
-## execution / usage
+## Execution / Usage
 
 Use `python3 youtube_snapper.py` for an overview.
 
@@ -37,7 +41,7 @@ Usage examples for this module:
 
 `python3 youtube_snapper.py -f "PATH_TO_FILE"`
 
-## additional links
+## Additional links
 
 - [pytube module documentation](https://pytube.io/en/latest/api.html#stream-object)
 
