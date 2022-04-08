@@ -167,10 +167,7 @@ def download_sound(video_url):
     audio = youtube.streams.filter(only_audio=True).order_by("abr").last()
     audio_filetype = audio.mime_type.split("/")[-1]
 
-    vid_title = audio.title
-
-    for c in ("<", ">", ":", "\"", "/", "\\", "|", "?", "*"):
-        vid_title = vid_title.replace(c, " ")
+    vid_title = convert_title(audio.title)
 
     print(f"abr={audio.abr}, filetype={audio.subtype}, "
           f"audio_codec={audio.audio_codec}")
@@ -216,7 +213,6 @@ if __name__ == "__main__":
 
     if args.quality and re.fullmatch(r"\d{3,4}p", args.quality):
         args.quality = int(args.quality[:-1])
-        #print(f"Max. Video Quality = {args.quality}p")
     else:
         args.quality = 1080
 
