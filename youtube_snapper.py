@@ -3,6 +3,7 @@ import os
 import argparse
 import pytube
 import urllib.request
+import re
 
 
 doc = """
@@ -18,7 +19,7 @@ Documentation of the pytube module:
     https://pytube.io/en/latest/api.html#stream-object
 
 Usage examples of this module:
->>> youtube_snapper.py -v "VidLink1" "VidLink2" "VidLink3" --hq --mkv
+>>> youtube_snapper.py -v "VidLink1" "VidLink2" "VidLink3" -q 1440p --mkv
 >>> youtube_snapper.py -p "Playlistlink" --mp3
 >>> youtube_snapper.py -f "Filelink"
 
@@ -95,7 +96,9 @@ def download_video(video_url):
         # get thumbnail
         urllib.request.urlretrieve(youtube.thumbnail_url, "thumb.jpg")
 
-    iter_res = iter(RESOLUTIONS[2 * (1 - args.hq):])
+    iter_res = filter(lambda x: int(x[:-1]) <= args.quality, RESOLUTIONS)
+    # iter_res = iter(RESOLUTIONS[2 * (1 - args.hq):])
+
     while True:
         try:
             video = youtube.streams.filter(res=next(iter_res))
@@ -198,10 +201,10 @@ if __name__ == "__main__":
     g.add_argument("-playlist", "-p", type=str, metavar="PLAYLIST_URL",
                    help="Downloads all videos in the specified playlist")
     g.add_argument("-file", "-f", type=str, metavar="FILE_PATH",
-                   help="Downloads all urls specified in textfile in the same dir"
-                   " (seperated by new line)")
-    parser.add_argument("-hq", action="store_true",
-                        help="Allows resolutions > 1080p")
+                   help="Downloads all urls specified in textfile in the same"
+                   " dir (seperated by new line)")
+    parser.add_argument("--quality", "-q", type=str,
+                        help="Specifies maximum video resolution e.g. 720p")
     h = parser.add_mutually_exclusive_group()
     h.add_argument("-mkv", action="store_true",
                    help="Specifies output file to be of type mkv")
@@ -210,6 +213,12 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     download = download_sound if args.mp3 else download_video
+
+    if args.quality and re.fullmatch(r"\d{3,4}p", args.quality):
+        args.quality = int(args.quality[:-1])
+        #print(f"Max. Video Quality = {args.quality}p")
+    else:
+        args.quality = 1080
 
     if args.video:
         if not os.path.exists(DL_PATH):

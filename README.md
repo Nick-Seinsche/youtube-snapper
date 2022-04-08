@@ -21,7 +21,7 @@ providers. This tool has none of such restrictions and is completely free.
 
 ## Installation / Setup
 
-- Latest [FFmpeg](https://ffmpeg.org/download.html) executable (*ffmpeg.exe*) downloaded (e.g. from [here](https://github.com/BtbN/FFmpeg-Builds/releases)) and placed in the same  directory 
+- Latest [FFmpeg](https://ffmpeg.org/download.html) executable (*ffmpeg.exe*) downloaded (e.g. from [here](https://github.com/BtbN/FFmpeg-Builds/releases)) and placed in the same  directory
 as *youtube_snapper.py*. Alternatively the
 relative path may be specified in *youtube_snapper.py*.
 
@@ -35,7 +35,7 @@ Use `python3 youtube_snapper.py` for an overview.
 
 Usage examples for this module:
 
-`python3 youtube_snapper.py -v "VIDEO_URL_1" "VIDEO_URL_2" "VIDEO_URL_3" --hq --mkv`
+`python3 youtube_snapper.py -v "VIDEO_URL_1" "VIDEO_URL_2" "VIDEO_URL_3" -q 1440p --mkv`
 
 `python3 youtube_snapper.py -p "PLAYLIST_URL" --mp3`
 
