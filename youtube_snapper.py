@@ -1,3 +1,4 @@
+import logging
 import time
 import os
 import argparse
@@ -57,16 +58,11 @@ def download_iterator(url_list, to_call):
     while max_retry > 0:
         for video_url in to_download:
             try:
-                print("-" * 15)
                 to_call(video_url)
             except Exception as e:
-                print("Failed a video. Trying again.")
-                print(e)
+                logging.error(f"Failed to download {video_url}. Trying again in 5 seconds...")
                 failed.append(video_url)
-                print("waiting 5 seconds ...")
                 time.sleep(5)
-            else:
-                print("Success.")
         if failed:
             to_download = failed
             failed = []
@@ -74,7 +70,7 @@ def download_iterator(url_list, to_call):
         else:
             break
     else:
-        print("Download Aborted!")
+        logging.critical("Aborting download after multiple conesecutive fails.")
 
 
 def download_video(video_url):
@@ -87,10 +83,8 @@ def download_video(video_url):
     try:
         youtube = pytube.YouTube(video_url,
                                  on_progress_callback=download_callback)
-    except Exception:
-        print(f"[ERROR] Could not load {video_url}")
-        time.sleep(2)
-        return False
+    except Exception as exception:
+        raise exception
 
     if not args.mkv:
         # get thumbnail
@@ -111,9 +105,12 @@ def download_video(video_url):
             video = video.order_by("fps").last()
             break
 
-    print(f"title={video.title}")
-    print(f"res={video.resolution}, fps={video.fps}, "
-          f"filetype={video.subtype}, video_codec={video.video_codec}")
+    logging.info(f"""title={video.title}, video_res={video.resolution},
+                 video_fps={video.fps}, video_filetype={video.subtype},
+                 video_codec={video.video_codec}""")
+    # print(f"title={video.title}")
+    # print(f"res={video.resolution}, fps={video.fps}, "
+    #       f"filetype={video.subtype}, video_codec={video.video_codec}")
 
     video_filetype = video.mime_type.split("/")[-1]
     vid_title = convert_title(video.title)
@@ -122,8 +119,12 @@ def download_video(video_url):
         audio = youtube.streams.filter(only_audio=True).order_by("abr").last()
         audio_filetype = audio.mime_type.split("/")[-1]
 
-        print(f"abr={audio.abr}, filetype={audio.subtype}, "
-              f"audio_codec={audio.audio_codec}")
+        logging.info(f"""audio_abr={audio.abr},
+                     audio_filetype={audio.subtype},
+                     audio_codec={audio.audio_codec}""")
+
+        # print(f"abr={audio.abr}, filetype={audio.subtype}, "
+        #       f"audio_codec={audio.audio_codec}")
 
         video.download(filename=(f"tempvid.{video_filetype}"))
         audio.download(filename=(f"tempaud.{audio_filetype}"))
@@ -145,7 +146,8 @@ def download_video(video_url):
         os.system(f"del tempaud.{audio_filetype}")
 
     else:
-        print("Downloading video and audio...")
+        logging.info("Downloading video and audio...")
+        # print("Downloading video and audio...")
         video.download(filename=(f"\"{vid_title}\".{video_filetype}"))
 
     return True
@@ -159,18 +161,20 @@ def download_sound(video_url):
     try:
         youtube = pytube.YouTube(video_url,
                                  on_progress_callback=download_callback)
-    except Exception:
-        print(f"[ERROR] Could not load {video_url}")
-        time.sleep(2)
-        return False
+    except Exception as exception:
+        raise exception
 
     audio = youtube.streams.filter(only_audio=True).order_by("abr").last()
     audio_filetype = audio.mime_type.split("/")[-1]
 
     vid_title = convert_title(audio.title)
 
-    print(f"abr={audio.abr}, filetype={audio.subtype}, "
-          f"audio_codec={audio.audio_codec}")
+    # print(f"abr={audio.abr}, filetype={audio.subtype}, "
+    #       f"audio_codec={audio.audio_codec}")
+
+    logging.info(f"""audio_abr={audio.abr},
+                 audio_filetype={audio.subtype},
+                 audio_codec={audio.audio_codec}""")
 
     audio.download(filename=(f"tempaud.{audio_filetype}"))
 
@@ -209,6 +213,8 @@ if __name__ == "__main__":
                    help="Specifies output file to be of type mp3")
     args = parser.parse_args()
 
+    logging.basicConfig(format='[%(name)] %(message)s')
+
     download = download_sound if args.mp3 else download_video
 
     if args.quality and re.fullmatch(r"\d{3,4}p", args.quality):
@@ -235,5 +241,4 @@ if __name__ == "__main__":
         os.chdir(DL_PATH + "/" + args.file[:args.file.rfind(".")])
         download_iterator(links, download)
     else:
-        print(doc, end="\n"*2)
         parser.print_help()
