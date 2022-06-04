@@ -60,7 +60,9 @@ def download_iterator(url_list, to_call):
             try:
                 to_call(video_url)
             except Exception as e:
-                logging.error(f"Failed to download {video_url}. Trying again in 5 seconds...")
+                logging.error(f"""Failed to download {video_url}."""
+                              """ Trying again in 5 seconds...""")
+                logging.debug(e)
                 failed.append(video_url)
                 time.sleep(5)
         if failed:
@@ -70,7 +72,8 @@ def download_iterator(url_list, to_call):
         else:
             break
     else:
-        logging.critical("Aborting download after multiple conesecutive fails.")
+        logging.critical("""Aborting download after multiple"""
+                         """ conesecutive fails.""")
 
 
 def download_video(video_url):
@@ -80,18 +83,14 @@ def download_video(video_url):
         audio stream by abr seperately and combining them using ffmpeg
         Default filetype is mp4.
     """
-    try:
-        youtube = pytube.YouTube(video_url,
-                                 on_progress_callback=download_callback)
-    except Exception as exception:
-        raise exception
+    youtube = pytube.YouTube(video_url,
+                             on_progress_callback=download_callback)
 
     if not args.mkv:
         # get thumbnail
         urllib.request.urlretrieve(youtube.thumbnail_url, "thumb.jpg")
 
     iter_res = filter(lambda x: int(x[:-1]) <= args.quality, RESOLUTIONS)
-    # iter_res = iter(RESOLUTIONS[2 * (1 - args.hq):])
 
     while True:
         try:
@@ -105,12 +104,11 @@ def download_video(video_url):
             video = video.order_by("fps").last()
             break
 
-    logging.info(f"""title={video.title}, video_res={video.resolution},
-                 video_fps={video.fps}, video_filetype={video.subtype},
-                 video_codec={video.video_codec}""")
-    # print(f"title={video.title}")
-    # print(f"res={video.resolution}, fps={video.fps}, "
-    #       f"filetype={video.subtype}, video_codec={video.video_codec}")
+    logging.info(f"title={video.title}")
+    logging.info(f"video_res={video.resolution}")
+    logging.info(f"video_fps={video.fps}")
+    logging.info(f"video_filetype={video.subtype}")
+    logging.info(f"video_codec={video.video_codec}")
 
     video_filetype = video.mime_type.split("/")[-1]
     vid_title = convert_title(video.title)
@@ -119,15 +117,14 @@ def download_video(video_url):
         audio = youtube.streams.filter(only_audio=True).order_by("abr").last()
         audio_filetype = audio.mime_type.split("/")[-1]
 
-        logging.info(f"""audio_abr={audio.abr},
-                     audio_filetype={audio.subtype},
-                     audio_codec={audio.audio_codec}""")
-
-        # print(f"abr={audio.abr}, filetype={audio.subtype}, "
-        #       f"audio_codec={audio.audio_codec}")
+        logging.info(f"audio_abr={audio.abr}")
+        logging.info(f"audio_filetype={audio.subtype}")
+        logging.info(f"audio_codec={audio.audio_codec}")
 
         video.download(filename=(f"tempvid.{video_filetype}"))
         audio.download(filename=(f"tempaud.{audio_filetype}"))
+
+        logging.info(f"Merging temp files using FFMpeg...")
 
         if args.mkv:
             os.system(FF_PATH + "ffmpeg -hide_banner -loglevel warning -stats"
@@ -147,10 +144,7 @@ def download_video(video_url):
 
     else:
         logging.info("Downloading video and audio...")
-        # print("Downloading video and audio...")
         video.download(filename=(f"\"{vid_title}\".{video_filetype}"))
-
-    return True
 
 
 def download_sound(video_url):
@@ -158,33 +152,28 @@ def download_sound(video_url):
         Downloads the video sound at the specified video_url by finding the
         the best audio stream by abr. Default filetype is mp3.
     """
-    try:
-        youtube = pytube.YouTube(video_url,
-                                 on_progress_callback=download_callback)
-    except Exception as exception:
-        raise exception
+    youtube = pytube.YouTube(video_url,
+                             on_progress_callback=download_callback)
 
     audio = youtube.streams.filter(only_audio=True).order_by("abr").last()
     audio_filetype = audio.mime_type.split("/")[-1]
 
     vid_title = convert_title(audio.title)
 
-    # print(f"abr={audio.abr}, filetype={audio.subtype}, "
-    #       f"audio_codec={audio.audio_codec}")
 
-    logging.info(f"""audio_abr={audio.abr},
-                 audio_filetype={audio.subtype},
-                 audio_codec={audio.audio_codec}""")
+    logging.info(f"audio_abr={audio.abr}")
+    logging.info(f"audio_filetype={audio.subtype}")
+    logging.info(f"audio_codec={audio.audio_codec}")
 
     audio.download(filename=(f"tempaud.{audio_filetype}"))
+
+    logging.info(f"Merging temp files using FFMpeg...")
 
     os.system(FF_PATH + f"ffmpeg -hide_banner -loglevel warning -stats "
               f"-i tempaud.{audio_filetype} -acodec"
               f" libmp3lame \"{vid_title}\".mp3")
 
     os.system(f"del tempaud.{audio_filetype}")
-
-    return True
 
 
 def download_callback(self, chunk, bytes_remaining):
@@ -213,7 +202,8 @@ if __name__ == "__main__":
                    help="Specifies output file to be of type mp3")
     args = parser.parse_args()
 
-    logging.basicConfig(format='[%(name)] %(message)s')
+    logging.basicConfig(format='[%(levelname)s] %(message)s',
+                        level=logging.INFO)
 
     download = download_sound if args.mp3 else download_video
 
