@@ -1,20 +1,13 @@
-import logging
-import time
-import os
-import argparse
-import pytube
-import urllib.request
-import re
-
-
-doc = """
+"""
 youtube_snapper.py module
 ---------------------------------------------------------------------
+
+PLEASE CHECK YOUTUBE'S TERMS OF SERVICE BEFORE USING THIS TOOL
 
 REQUIREMENTS TO RUN THIS MODULE:
 - pytube installed (pip install pytube, reinstall if error to fix bug)
 - ffmpeg.exe has to be in the same directory as this module
-  or the relative path must be set manually in FF_PATH.
+  (or the relative path must be set manually in FF_PATH).
 
 Documentation of the pytube module:
     https://pytube.io/en/latest/api.html#stream-object
@@ -26,6 +19,17 @@ Usage examples of this module:
 
 ---------------------------------------------------------------------
 """
+
+
+import logging
+import time
+import os
+import argparse
+import pytube
+import urllib.request
+import re
+import traceback
+
 
 # relative path for ffmpeg.exe.
 # Leave empty if ffmpeg was added to PATH
@@ -59,12 +63,12 @@ def download_iterator(url_list, to_call):
         for video_url in to_download:
             try:
                 to_call(video_url)
-            except Exception as e:
+            except Exception:
                 logging.error(f"""Failed to download {video_url}."""
                               """ Trying again in 5 seconds...""")
-                logging.debug(e)
+                logging.debug(traceback.format_exc())
                 failed.append(video_url)
-                time.sleep(5)
+                time.sleep(1)
         if failed:
             to_download = failed
             failed = []
@@ -83,7 +87,10 @@ def download_video(video_url):
         audio stream by abr seperately and combining them using ffmpeg
         Default filetype is mp4.
     """
-    youtube = pytube.YouTube(video_url,
+    # youtube = pytube.YouTube(video_url,
+    #                         on_progress_callback=download_callback)
+
+    youtube = pytube.YouTube(video_url, use_oauth=False, allow_oauth_cache=False,
                              on_progress_callback=download_callback)
 
     if not args.mkv:
@@ -124,7 +131,7 @@ def download_video(video_url):
         video.download(filename=(f"tempvid.{video_filetype}"))
         audio.download(filename=(f"tempaud.{audio_filetype}"))
 
-        logging.info(f"Merging temp files using FFMpeg...")
+        logging.info("Merging temp files using FFMpeg...")
 
         if args.mkv:
             os.system(FF_PATH + "ffmpeg -hide_banner -loglevel warning -stats"
@@ -137,7 +144,7 @@ def download_video(video_url):
                       " -map 0 -map 1 -map 2 -c:v copy -c:a aac "
                       "-disposition:2 attached_pic \"{}\".mp4"
                       .format(video_filetype, audio_filetype, vid_title))
-            os.system(f"del thumb.jpg")
+            os.system("del thumb.jpg")
 
         os.system(f"del tempvid.{video_filetype}")
         os.system(f"del tempaud.{audio_filetype}")
@@ -152,7 +159,10 @@ def download_sound(video_url):
         Downloads the video sound at the specified video_url by finding the
         the best audio stream by abr. Default filetype is mp3.
     """
-    youtube = pytube.YouTube(video_url,
+    # youtube = pytube.YouTube(video_url,
+    #                        on_progress_callback=download_callback)
+
+    youtube = pytube.YouTube(video_url, use_oauth=True, allow_oauth_cache=True,
                              on_progress_callback=download_callback)
 
     audio = youtube.streams.filter(only_audio=True).order_by("abr").last()
@@ -160,14 +170,13 @@ def download_sound(video_url):
 
     vid_title = convert_title(audio.title)
 
-
     logging.info(f"audio_abr={audio.abr}")
     logging.info(f"audio_filetype={audio.subtype}")
     logging.info(f"audio_codec={audio.audio_codec}")
 
     audio.download(filename=(f"tempaud.{audio_filetype}"))
 
-    logging.info(f"Merging temp files using FFMpeg...")
+    logging.info("Converting temp file using FFMpeg...")
 
     os.system(FF_PATH + f"ffmpeg -hide_banner -loglevel warning -stats "
               f"-i tempaud.{audio_filetype} -acodec"
@@ -203,7 +212,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     logging.basicConfig(format='[%(levelname)s] %(message)s',
-                        level=logging.INFO)
+                        level=logging.DEBUG)
+    # info,
 
     download = download_sound if args.mp3 else download_video
 
@@ -221,7 +231,7 @@ if __name__ == "__main__":
         playlist = pytube.Playlist(args.playlist)
         if not os.path.exists(DL_PATH + "/" + convert_title(playlist.title)):
             os.makedirs(DL_PATH + "/" + convert_title(playlist.title))
-        download_iterator(playlist.video_urls, download)
+        download_iterator(list(playlist.video_urls), download)
     elif args.file:
         if (not os.path.exists(DL_PATH + "/"
                                + args.file[:args.file.rfind(".")])):
