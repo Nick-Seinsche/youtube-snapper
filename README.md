@@ -45,7 +45,7 @@ Usage examples for this module:
 
 ## LICENSE
 
-Slideshow is distributed under the terms of the MIT License. All new contributions must be made under this license. See LICENSE for details.
+youtube-snapper is distributed under the terms of the MIT License. All new contributions must be made under this license. See LICENSE for details.
 
 ## Additional links
 
